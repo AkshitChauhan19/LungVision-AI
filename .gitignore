@@ -1,0 +1,58 @@
+# Secrets, environment files, and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.secret
+ngrok_url.txt
+tunnel_url.txt
+
+# Virtual environments & dependencies
+.venv/
+venv/
+env/
+node_modules/
+package-lock.json
+
+# Python caches & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Executables & OS files
+*.exe
+.DS_Store
+Thumbs.db
+
+# Raw & harmonized medical datasets (download locally via scripts/download_dataset.py)
+data/
+
+# Duplicate deployment staging directory (use root Dockerfile instead)
+deploy_hf/
+
+# Experimental checkpoints (keep fold_1 and adapted for out-of-the-box web inference)
+checkpoints/moe/
+checkpoints/nodule_expert/
+
+# Scratch / local paper generation scripts (contain local system paths)
+build_final_flawless_paper.py
+build_perfect_ieee_paper.py
+generate_final_paper_v2.py
+generate_final_research_paper.py
+generate_perfect_paper_exact6.py
+generate_perfect_paper_final.py
+temp_test_gen.py
+transform_to_final_research_paper.py
+
+# Generated outputs: ignore private patient slices & temp test files, keep benchmark figures
+outputs/*
+!outputs/fig1_pipeline_diagram.png
+!outputs/fig2_gradcam_3panel.png
+!outputs/fig3_confusion_matrices.png
+!outputs/confusion_matrix.png
+!outputs/external_confusion_matrix.png
+!outputs/adapted_confusion_matrix.png

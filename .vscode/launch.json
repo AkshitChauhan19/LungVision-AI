@@ -1,0 +1,44 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train EfficientNet-B1 + CBAM (1 Fold Demo)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/run_training.py",
+            "args": [
+                "--model", "efficientnet_cbam",
+                "--epochs", "15",
+                "--batch_size", "16",
+                "--folds", "1"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Train ResNet50 Baseline",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/run_training.py",
+            "args": [
+                "--model", "resnet50",
+                "--epochs", "15",
+                "--batch_size", "16",
+                "--folds", "1"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Train 5-Fold Cross Validation (Full)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/run_training.py",
+            "args": [
+                "--model", "efficientnet_cbam",
+                "--epochs", "25",
+                "--batch_size", "16",
+                "--folds", "5"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}

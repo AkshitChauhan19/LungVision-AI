@@ -1,0 +1,1078 @@
+"""
+Generate pixel-perfect presentation slides matching the original PDF design,
+incorporating all updates (removing SMOTE, adding validation, focal loss,
+verified metrics, physical film processor, LIDC consensus protocol, new references)
+and compiling to PDF using Microsoft Edge headless.
+"""
+import os
+import subprocess
+
+html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI-Based Lung Cancer Detection from CT Scan Images using Deep Learning</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #FAF6EE;
+    color: #2E211F;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 16in;
+    height: 9in;
+    page-break-after: always;
+    position: relative;
+    background-color: #FAF6EE;
+    padding: 0.65in 0.9in;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Typography */
+  h1.slide-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: #2D1D1A;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+  }
+
+  h2.section-header {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+    color: #8C3B2F;
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+
+  p, li {
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: #4A3B38;
+  }
+
+  /* Card Component */
+  .card {
+    background: #FFFFFF;
+    border-radius: 10px;
+    border: 1px solid #EADBCC;
+    box-shadow: 0 4px 12px rgba(45, 29, 26, 0.03);
+    padding: 22px 26px;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 21px;
+    font-weight: 600;
+    color: #2D1D1A;
+    margin-bottom: 10px;
+  }
+
+  .card-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9E5346;
+    margin-bottom: 8px;
+  }
+
+  /* Alert Bottom Box */
+  .alert-box {
+    background: #F4ECE1;
+    border-radius: 8px;
+    border-left: 5px solid #D97724;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: auto;
+  }
+
+  .alert-box .icon {
+    font-size: 20px;
+    color: #D97724;
+    flex-shrink: 0;
+  }
+
+  .alert-box p {
+    font-size: 14.5px;
+    font-weight: 500;
+    color: #42322F;
+    margin: 0;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    flex: 1;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+
+  /* Slide 1 - Title */
+  .title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    padding: 0 1in;
+  }
+
+  .main-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 54px;
+    font-weight: 600;
+    color: #2D1D1A;
+    line-height: 1.25;
+    margin-bottom: 24px;
+    max-width: 1200px;
+  }
+
+  .affiliation {
+    font-size: 17px;
+    color: #6B5550;
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .supervisor {
+    font-size: 16px;
+    color: #8C3B2F;
+    font-weight: 600;
+    margin-bottom: 54px;
+  }
+
+  .title-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 1250px;
+    text-align: left;
+  }
+
+  .title-grid .card {
+    padding: 18px 22px;
+  }
+
+  .title-grid .label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8C3B2F;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .title-grid .value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2D1D1A;
+  }
+
+  /* Slide 2 - Outline */
+  .outline-left {
+    background: #6E2D23;
+    border-radius: 12px;
+    padding: 40px;
+    color: #FAF6EE;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .outline-left .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: #DF9B8F;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .outline-left .item-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+  }
+
+  .outline-left .item-desc {
+    font-size: 14px;
+    color: #EAD2CD;
+    line-height: 1.4;
+  }
+
+  .outline-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 20px;
+  }
+
+  .outline-right .item {
+    border-bottom: 1.5px solid #E5D5C5;
+    padding-bottom: 18px;
+  }
+
+  .outline-right .item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .outline-right .num {
+    font-size: 15px;
+    font-weight: 700;
+    color: #8C3B2F;
+    margin-bottom: 2px;
+  }
+
+  .outline-right .item-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #2D1D1A;
+    margin-bottom: 4px;
+  }
+
+  .outline-right .item-desc {
+    font-size: 14.5px;
+    color: #61504D;
+  }
+
+  /* Table Style */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #FFFFFF;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(45, 29, 26, 0.04);
+    border: 1px solid #E6D7C8;
+    margin-bottom: 16px;
+  }
+
+  .comp-table th {
+    background: #6E2D23;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    padding: 14px 16px;
+    letter-spacing: 0.3px;
+  }
+
+  .comp-table td {
+    padding: 12px 16px;
+    font-size: 13.5px;
+    border-bottom: 1px solid #EFE4D6;
+    color: #382A27;
+    vertical-align: middle;
+  }
+
+  .comp-table tr:nth-child(even) {
+    background: #FDFBF7;
+  }
+
+  .comp-table tr.highlight {
+    background: #FBF0E4;
+    font-weight: 600;
+  }
+
+  .comp-table tr.highlight td {
+    color: #6E2D23;
+    border-bottom: 2px solid #D97724;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .badge-success {
+    background: #E5F3E8;
+    color: #236B36;
+  }
+
+  /* Numbered Steps / Objectives */
+  .step-card {
+    background: #FFFFFF;
+    border-radius: 10px;
+    border: 1px solid #EADBCC;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #D97724;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2D1D1A;
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    color: #554441;
+    line-height: 1.45;
+  }
+
+  /* Workflow Circles */
+  .workflow-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin: 30px 0 40px;
+    padding: 0 40px;
+  }
+
+  .workflow-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 80px;
+    right: 80px;
+    height: 3px;
+    background: #EADBCC;
+    z-index: 1;
+  }
+
+  .workflow-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .workflow-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 4px solid #D97724;
+    background: #FAF6EE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 16px rgba(217, 119, 36, 0.12);
+  }
+
+  .workflow-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px;
+    font-weight: 600;
+    color: #2D1D1A;
+  }
+
+  .stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #F3ECE1;
+    border: 1px solid #DFD2C2;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #6E2D23;
+  }
+
+  .cite-box {
+    background: #FFFFFF;
+    border: 1px solid #EADBCC;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #4A3B38;
+  }
+
+  .cite-box strong {
+    color: #2D1D1A;
+  }
+</style>
+</head>
+<body>
+
+<!-- =================================================================== -->
+<!-- SLIDE 1: TITLE -->
+<!-- =================================================================== -->
+<div class="slide">
+  <div class="title-container">
+    <h1 class="main-title">AI-Based Lung Cancer Detection from CT Scan Images using Deep Learning</h1>
+    <div class="affiliation">[Meerut Institute of Engineering and Technology] | [Department of Computer Science Engineering (Artificial Intelligence)]</div>
+    <div class="supervisor">Supervised by: [Mrs. Monika Sharma Ma'am]</div>
+
+    <div class="title-grid">
+      <div class="card">
+        <div class="label">Domain</div>
+        <div class="value">Medical Imaging & Deep Learning</div>
+      </div>
+      <div class="card">
+        <div class="label">Focus</div>
+        <div class="value">CT Scan Classification — 3 Classes</div>
+      </div>
+      <div class="card">
+        <div class="label">Contribution</div>
+        <div class="value">Input Validation, Focal Loss & Pointing Game</div>
+      </div>
+      <div class="card">
+        <div class="label">Models</div>
+        <div class="value">EfficientNetB1 + CBAM vs. ResNet50</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 2: OUTLINE -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Outline</h1>
+  <div class="grid-2">
+    <div class="outline-left">
+      <div>
+        <div class="num">01</div>
+        <div class="item-title">Introduction</div>
+        <div class="item-desc">Motivation, clinical context, and project scope</div>
+      </div>
+      <div>
+        <div class="num">02</div>
+        <div class="item-title">Literature Review</div>
+        <div class="item-desc">Key benchmark studies reviewed across 2025–2026</div>
+      </div>
+      <div>
+        <div class="num">03</div>
+        <div class="item-title">Comparative Summary</div>
+        <div class="item-desc">Side-by-side performance table with verified metrics</div>
+      </div>
+      <div>
+        <div class="num">04</div>
+        <div class="item-title">Research Gap & Challenges</div>
+        <div class="item-desc">Patient leakage, input validation, and domain shift</div>
+      </div>
+      <div>
+        <div class="num">05</div>
+        <div class="item-title">Aims and Objectives</div>
+        <div class="item-desc">Six concrete, methodologically validated research goals</div>
+      </div>
+    </div>
+
+    <div class="outline-right">
+      <div class="item">
+        <div class="num">01</div>
+        <div class="item-title">Research Methodology</div>
+        <div class="item-desc">Workflow, multi-center datasets, preprocessing, and CBAM attention</div>
+      </div>
+      <div class="item">
+        <div class="num">02</div>
+        <div class="item-title">Technologies, Tools, and Hardware</div>
+        <div class="item-desc">PyTorch, Torchvision, OpenCV, Albumentations, and compute setup</div>
+      </div>
+      <div class="item">
+        <div class="num">03</div>
+        <div class="item-title">Refinements Over Existing Literature</div>
+        <div class="item-desc">Class-Balanced Focal Loss, Pointing Game, and physical film processing</div>
+      </div>
+      <div class="item">
+        <div class="num">04</div>
+        <div class="item-title">References</div>
+        <div class="item-desc">APA 7th edition formatted citations for all literature and foundational works</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 3: INTRODUCTION -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Introduction</h1>
+  <div class="grid-2">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="card">
+        <div class="card-title">Global Burden of Lung Cancer</div>
+        <p>Lung cancer is the <strong>leading cause of cancer-related mortality worldwide</strong>. Early detection is the single most impactful intervention for improving patient 5-year survival rates, yet the disease is frequently diagnosed at advanced, less treatable stages.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Limitations of Manual CT Interpretation</div>
+        <p>Chest CT scans are the gold-standard diagnostic modality. However, manual radiological interpretation is <strong>time-consuming, subjective, and prone to fatigue</strong>, creating severe diagnostic bottlenecks in high-volume screening programs.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Role of Deep Learning & Attention</div>
+        <p>Deep learning—specifically <strong>CNNs augmented with CBAM spatial/channel attention</strong>—automates lesion screening, eliminates subjective reading bias, and ensures consistent, scalable, and reproducible clinical decision support.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="card">
+        <div class="card-title">Project Scope</div>
+        <p>This project develops a clinically viable, end-to-end deep learning CT classification system distinguishing three diagnostic categories: <strong>normal parenchyma, benign nodules, and malignant carcinomas</strong>.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Methodological Focus</div>
+        <p>The core emphasis is on <strong>methodological rigor and clinical safety</strong>: strict patient-level grouped cross-validation, Class-Balanced Focal Loss, two-stage input screening, and quantitative Grad-CAM explainability.</p>
+      </div>
+
+      <div class="alert-box" style="margin-top: 0;">
+        <div class="icon">&#9873;</div>
+        <p>The three-class distinction (normal / benign / malignant) provides actionable clinical triage and is significantly more challenging than binary tasks prevalent in prior literature.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 4: COMPARATIVE SUMMARY -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Comparative Summary of Reviewed Literature</h1>
+  <p style="font-size: 14.5px; color: #6E5D59; margin-bottom: 16px;">
+    The following table consolidates current literature alongside the proposed project, enabling direct comparison of architectures, datasets, evaluation metrics, and methodological rigor.
+  </p>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Paper (Author, Year)</th>
+        <th>Model(s) Used</th>
+        <th>Dataset</th>
+        <th>Reported Accuracy</th>
+        <th>Split Method</th>
+        <th>Key Limitation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Wang et al., 2026</strong></td>
+        <td>Meta-review (CNN, SVM, RF, ANN — 204 studies)</td>
+        <td>Mixed (204 studies)</td>
+        <td>68.4%–100% (range)</td>
+        <td>N/A</td>
+        <td>Inconsistent study quality; not clinically deployable</td>
+      </tr>
+      <tr>
+        <td><strong>Choudhury et al., 2025</strong></td>
+        <td>Custom CNN, VGG16, ResNet50, InceptionV3</td>
+        <td>IQ-OTH/NCCD</td>
+        <td>98.7% (val. acc.)</td>
+        <td>Not specified</td>
+        <td>Splitting methodology undisclosed; high leakage risk</td>
+      </tr>
+      <tr>
+        <td><strong>Ayesha et al., 2025</strong></td>
+        <td>Modified EfficientNet B0–B7 + attention</td>
+        <td>IQ-OTH, Chest-CT, LIDC</td>
+        <td>99.5% / 98.0% / 90.3%</td>
+        <td>Image-level</td>
+        <td>No patient-level split despite patient counts available</td>
+      </tr>
+      <tr>
+        <td><strong>Alpsalaz, 2025</strong></td>
+        <td>ResNet101, VGG19, DenseNet121</td>
+        <td>IQ-OTH/NCCD</td>
+        <td>98.0% (ResNet101)</td>
+        <td>Image-level</td>
+        <td>Relied on SMOTE synthetic pixel noise; benign/normal confusion</td>
+      </tr>
+      <tr>
+        <td><strong>Jian et al., 2025</strong></td>
+        <td>CNN-GRU hybrid</td>
+        <td>IQ-OTH/NCCD + CT-Scan</td>
+        <td>99.77%</td>
+        <td>Image-level</td>
+        <td>No cross-dataset validation; slice-level shuffle leakage</td>
+      </tr>
+      <tr>
+        <td><strong>Tan et al., 2025</strong></td>
+        <td>Survey of 7 architecture families (119 studies)</td>
+        <td>Mixed</td>
+        <td>N/A (survey)</td>
+        <td>N/A</td>
+        <td>Nodule-anatomy overlap & co-occurring disease unsolved</td>
+      </tr>
+      <tr class="highlight">
+        <td><strong>Proposed Project</strong></td>
+        <td><strong>EfficientNetB1 + CBAM (vs. ResNet50)</strong></td>
+        <td><strong>IQ-OTH + LIDC-IDRI (Clean Consensus)</strong></td>
+        <td><strong>96.82% CV | 98.40% Recall | 90.20% Binary</strong></td>
+        <td><strong>Patient-level 5-Fold Stratified</strong></td>
+        <td><strong>Zero leakage, Focal Loss (no SMOTE), Pointing Game, Two-Stage Input Filter</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert-box">
+    <div class="icon">&#9733;</div>
+    <p>The Proposed Project is the only study to combine patient-level group validation, Class-Balanced Focal Loss, quantitative Grad-CAM Pointing Game validation, and dual-center consensus testing.</p>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 5: LITERATURE REVIEW -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Literature Review</h1>
+  <div class="grid-2">
+    <div>
+      <div class="card-subtitle" style="margin-bottom: 12px;">PART I — 2025–2026 BENCHMARK STUDIES</div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <div class="card-title" style="font-size: 18px; margin: 0;">Wang et al. (Clinics, 2026)</div>
+            <span class="badge badge-success">Meta-Review</span>
+          </div>
+          <p style="font-size: 14px;">Systematic review of 204 AI-based lung cancer studies. CNN was the most prevalent architecture (accuracy 68.4%–100%, AUC 0.61–1.00). Concluded that commercial deployment remains blocked by inconsistent study quality and lack of reporting standards.</p>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <div class="card-title" style="font-size: 18px; margin: 0;">Choudhury et al. (Proc. Comp. Sci., 2025)</div>
+            <span class="badge badge-success">98.7% Acc</span>
+          </div>
+          <p style="font-size: 14px;">Benchmarked CNN, VGG16, ResNet50, and InceptionV3 on IQ-OTH/NCCD (1,097 images). Reported 98.7% validation accuracy. Splitting methodology was completely omitted, leaving reproducibility and anatomical leakage unverified.</p>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <div class="card-title" style="font-size: 18px; margin: 0;">Ayesha et al. (JAIT, 2025)</div>
+            <span class="badge badge-success">99.5% Acc</span>
+          </div>
+          <p style="font-size: 14px;">Evaluated modified EfficientNet (B0–B7) with additional CNN attention layers on IQ-OTH, Chest-CT, and LIDC-IDRI. EfficientNetB1 achieved top performance. Images were shuffled and split at the slice level despite patient IDs being available.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card-subtitle" style="margin-bottom: 12px;">PART II — METHODOLOGICAL CHALLENGES</div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <div class="card-title" style="font-size: 18px; margin: 0;">Alpsalaz (GU J Sci, 2025)</div>
+            <span class="badge badge-success">98.0% Acc</span>
+          </div>
+          <p style="font-size: 14px;">Applied ResNet101, VGG19, and DenseNet121 on IQ-OTH/NCCD using SMOTE for class balancing. DenseNet121 showed significant confusion between benign and normal. Noted that SMOTE synthetic pixel artifacts degrade medical imaging realism.</p>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <div class="card-title" style="font-size: 18px; margin: 0;">Jian et al. (Scientific Reports, 2025)</div>
+            <span class="badge badge-success">99.77% Acc</span>
+          </div>
+          <p style="font-size: 14px;">Proposed a hybrid CNN-GRU combining spatial and sequential feature extraction on IQ-OTH. Achieved 99.77% on an 80:20 holdout. Authors explicitly note that cross-center generalizability and out-of-distribution robustness were untested.</p>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <div class="card-title" style="font-size: 18px; margin: 0;">Tan et al. (Arch. Comp. Meth. Eng., 2025)</div>
+            <span class="badge badge-success">PRISMA Survey</span>
+          </div>
+          <p style="font-size: 14px;">Surveyed 119 studies across 7 architecture families. Identified nodule-anatomy overlap (pleura, blood vessels) and lack of input validation as major unresolved clinical deployment hurdles.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 6: RESEARCH GAP AND CHALLENGES -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Research Gap and Challenges</h1>
+  <div class="grid-2">
+    <div class="outline-left" style="padding: 32px;">
+      <div>
+        <div class="card-subtitle" style="color: #E5A89E;">CRITICAL METHODOLOGICAL DEFICIT</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; color: #FFFFFF; margin: 8px 0 14px;">
+          Patient-Level Data Leakage
+        </div>
+        <p style="font-size: 15px; color: #F5E5E1; line-height: 1.55;">
+          Most IQ-OTH/NCCD studies employ <strong>random slice-level train/test splitting</strong>. Because the dataset contains only 110 unique patients across ~1,097 slices, multiple consecutive slices from the same patient appear in both training and test sets.
+        </p>
+        <p style="font-size: 14.5px; color: #EAD2CD; margin-top: 12px; line-height: 1.5;">
+          The model simply memorizes individual patient anatomy (rib curvature, bone density) rather than learning true pathological cancer biomarkers, producing artificially inflated accuracies.
+        </p>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.18); border-radius: 8px; padding: 14px 18px; margin-top: 18px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #DF9B8F; text-transform: uppercase;">Confirmed Leakage in Prior Works</div>
+        <ul style="list-style: none; margin-top: 8px; font-size: 13.5px; color: #FFFFFF;">
+          <li>&#8226; <strong>Ayesha et al.:</strong> 80:20 slice-level split with shared patients</li>
+          <li>&#8226; <strong>Alpsalaz:</strong> 75:25 image-level split without patient grouping</li>
+          <li>&#8226; <strong>Jian et al.:</strong> 80:20 holdout with slice shuffling</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="card" style="padding: 16px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 4px;">1. Absence of Input Modality Validation</div>
+        <p style="font-size: 14px;">Existing pipelines process any uploaded file blindly. Clinical safety requires verifying that the input is a genuine medical CT and contains thoracic lung anatomy before inference.</p>
+      </div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 4px;">2. Synthetic Pixel Artifacts (SMOTE Issues)</div>
+        <p style="font-size: 14px;">Prior works use SMOTE interpolation, generating synthetic pixel noise that disrupts delicate radiomic CT textures. Mathematical loss reweighting (Focal Loss) is clinically superior.</p>
+      </div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 4px;">3. No Multi-Center Cross-Dataset Testing</div>
+        <p style="font-size: 14px;">Models trained and tested on a single hospital's scans collapse on external data due to scanner resolution and field-of-view discrepancies (full chest vs. nodule crops).</p>
+      </div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 4px;">4. Lack of Quantitative Explainability</div>
+        <p style="font-size: 14px;">Visual heatmaps are rarely validated mathematically. Proving clinical trust requires testing whether attention peaks land inside radiologist-annotated tumor contours.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 7: WORKFLOW OVERVIEW -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Research Methodology — Workflow Overview</h1>
+  <p style="font-size: 14.5px; color: #6E5D59; margin-bottom: 10px;">
+    The proposed pipeline follows a structured, clinically certified deep learning workflow from raw multi-center CT data to explainable, externally validated predictions:
+  </p>
+
+  <div class="workflow-container">
+    <div class="workflow-step">
+      <div class="workflow-circle">&#128196;</div>
+      <div class="workflow-label">Data</div>
+      <p style="font-size: 12.5px; color: #6E5D59; margin-top: 4px;">IQ-OTH + LIDC</p>
+    </div>
+    <div class="workflow-step">
+      <div class="workflow-circle">&#128269;</div>
+      <div class="workflow-label">Validate</div>
+      <p style="font-size: 12.5px; color: #6E5D59; margin-top: 4px;">Modality & Organ</p>
+    </div>
+    <div class="workflow-step">
+      <div class="workflow-circle">&#9878;</div>
+      <div class="workflow-label">Harmonize</div>
+      <p style="font-size: 12.5px; color: #6E5D59; margin-top: 4px;">Hist-Match & Pad</p>
+    </div>
+    <div class="workflow-step">
+      <div class="workflow-circle">&#9881;</div>
+      <div class="workflow-label">Train</div>
+      <p style="font-size: 12.5px; color: #6E5D59; margin-top: 4px;">EfficientNet+CBAM</p>
+    </div>
+    <div class="workflow-step">
+      <div class="workflow-circle">&#127919;</div>
+      <div class="workflow-label">Evaluate</div>
+      <p style="font-size: 12.5px; color: #6E5D59; margin-top: 4px;">TTA & Pointing</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 18px 24px; background: #FFFFFF;">
+    <div style="font-size: 14.5px; line-height: 1.6; color: #382A27;">
+      <strong>Methodological Innovations Across Each Stage:</strong>
+      <ul style="margin-left: 20px; margin-top: 6px;">
+        <li><strong>Two-Stage Validation:</strong> Rejects non-CT images and non-thoracic organs (brain, abdomen) before feeding model.</li>
+        <li><strong>Letterbox Padding:</strong> Preserves natural circular nodule geometry without aspect-ratio distortion.</li>
+        <li><strong>Linear Histogram Matching:</strong> Standardizes external scanner intensities (&mu;=101.5, &sigma;=75.6) to eliminate manufacturer bias.</li>
+        <li><strong>Class-Balanced Focal Loss:</strong> Focuses backpropagation on hard tumor margins without generating fake SMOTE noise.</li>
+        <li><strong>Explainable Verification:</strong> Quantitative Pointing Game verifies AI focus against board-certified radiologist masks (93.8% hit rate).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 8: AIMS AND OBJECTIVES -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Aims and Objectives</h1>
+  <p style="font-size: 15px; color: #6E5D59; margin-bottom: 20px;">
+    <strong>Aim:</strong> To develop an AI-based lung cancer classification system from CT scans that is accurate, methodologically rigorous, clinically safe, and externally validated across international hospital protocols.
+  </p>
+
+  <div class="grid-3" style="gap: 18px;">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Dataset Harmonization</div>
+      <div class="step-desc">Preprocess IQ-OTH/NCCD and LIDC-IDRI via linear histogram matching and letterbox padding for consistent 3-class classification.</div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Dual-Attention Architecture</div>
+      <div class="step-desc">Build and train an EfficientNetB1 model integrated with CBAM (Spatial + Channel Attention), benchmarked against a standard ResNet50 baseline.</div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Zero Patient Leakage</div>
+      <div class="step-desc">Implement 5-Fold Stratified Group K-Fold cross-validation, strictly ensuring all slices from any patient belong exclusively to either train or test folds.</div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-title">Focal Loss Optimization</div>
+      <div class="step-desc">Implement Class-Balanced Focal Loss (&gamma;=2.0) to resolve benign minority imbalance directly in the loss function, completely avoiding SMOTE artifacts.</div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">5</div>
+      <div class="step-title">Explainability & Pointing Game</div>
+      <div class="step-desc">Generate Grad-CAM saliency heatmaps and evaluate the quantitative Pointing Game to mathematically verify tumor localization against radiologist annotations.</div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">6</div>
+      <div class="step-title">Input Validation & External Testing</div>
+      <div class="step-desc">Deploy two-stage modality/organ screening and evaluate generalizability on an unseen external cohort (LIDC-IDRI) with Test-Time Augmentation (TTA).</div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 9: DATASETS & IMBALANCE HANDLING -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Research Methodology — Datasets & Imbalance Handling</h1>
+  <div class="grid-2" style="margin-bottom: 20px;">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <div class="card-title">IQ-OTH/NCCD — Primary Dataset</div>
+        <span class="badge badge-success">Primary Training Cohort</span>
+      </div>
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <span class="stat-pill">&#128193; 1,097 CT Slices</span>
+        <span class="stat-pill">&#128100; 110 Unique Patients</span>
+      </div>
+      <p style="font-size: 14px; line-height: 1.5; margin-bottom: 8px;">
+        Collected from Iraq-Oncology Teaching Hospital & National Center for Cancer Diseases. Publicly hosted on Mendeley Data.
+      </p>
+      <p style="font-size: 14px; line-height: 1.5;">
+        <strong>3 Diagnostic Classes:</strong> Normal (416 slices), Benign (120 slices), and Malignant (561 slices). Grouped patient splitting is strictly enforced to prevent anatomical leakage.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <div class="card-title">LIDC-IDRI — External Test Dataset</div>
+        <span class="badge badge-success">Multi-Center Validation</span>
+      </div>
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <span class="stat-pill">&#128193; 750 Clean Slices</span>
+        <span class="stat-pill">&#9877; 4-Radiologist Consensus</span>
+      </div>
+      <p style="font-size: 14px; line-height: 1.5; margin-bottom: 8px;">
+        International reference cohort from 7 academic centers (The Cancer Imaging Archive, TCIA).
+      </p>
+      <p style="font-size: 14px; line-height: 1.5;">
+        <strong>Clean Consensus Protocol:</strong> 250 confirmed Normal, 250 Benign, and 250 Malignant solid tumor slices (&ge;3 radiologist agreement) with verified contour masks.
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 20px 24px;">
+    <div class="card-title" style="font-size: 19px; margin-bottom: 8px;">Class Imbalance Resolution: Why Focal Loss Replaced SMOTE</div>
+    <div class="grid-2" style="gap: 20px;">
+      <div>
+        <strong style="color: #8C3B2F; font-size: 15px;">1. The Flaw of SMOTE in Medical CT</strong>
+        <p style="font-size: 13.5px; margin-top: 4px;">
+          SMOTE synthesizes minority samples by interpolating between feature points. In CT scans, this generates blurred, unphysical pixel noise that violates anatomical Hounsfield Unit densities and corrupts radiomic textures.
+        </p>
+      </div>
+      <div>
+        <strong style="color: #8C3B2F; font-size: 15px;">2. Class-Balanced Focal Loss (&gamma;=2.0)</strong>
+        <p style="font-size: 13.5px; margin-top: 4px;">
+          Operates purely in loss computation: down-weights easy, well-classified normal slices and scales up the gradient contribution of hard benign/malignant lesion boundaries without modifying pixel integrity.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 10: PREPROCESSING & AUGMENTATION -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">Research Methodology — Preprocessing & Augmentation</h1>
+  <div class="grid-2">
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div class="card-subtitle" style="margin-bottom: 4px;">CLINICAL PREPROCESSING PIPELINE</div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div style="font-weight: 700; color: #8C3B2F; font-size: 15px; margin-bottom: 4px;">&#10140; Two-Stage Automated Validation</div>
+        <p style="font-size: 13.5px;">Stage 1 verifies medical grayscale modality (rejects color photos). Stage 2 segments lung cavities and spine (rejects brain, abdomen, and non-thoracic scans).</p>
+      </div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div style="font-weight: 700; color: #8C3B2F; font-size: 15px; margin-bottom: 4px;">&#10140; Letterbox Padding & Resizing (240&times;240)</div>
+        <p style="font-size: 13.5px;">Preserves square aspect ratio with uniform borders, preventing round nodules from stretching into ovals. Resized smoothly to EfficientNet-B1's native resolution.</p>
+      </div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div style="font-weight: 700; color: #8C3B2F; font-size: 15px; margin-bottom: 4px;">&#10140; Linear Histogram Matching</div>
+        <p style="font-size: 13.5px;">Standardizes pixel intensity distributions (&mu;=101.5, &sigma;=75.6) across external hospital scanners to remove machine manufacturer contrast bias.</p>
+      </div>
+
+      <div class="card" style="padding: 16px 20px;">
+        <div style="font-weight: 700; color: #8C3B2F; font-size: 15px; margin-bottom: 4px;">&#10140; Tensor Normalization</div>
+        <p style="font-size: 13.5px;">Scaled to [0, 1] and normalized with ImageNet mean/std for stable gradient backpropagation and pre-trained transfer learning compatibility.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div class="card-subtitle" style="margin-bottom: 4px;">AUGMENTATION & INFERENCE PIPELINE</div>
+
+      <div class="card" style="padding: 18px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 6px;">Physics-Informed Training Augmentation</div>
+        <p style="font-size: 13.5px; line-height: 1.5;">
+          Applies horizontal flips (leveraging bilateral lung symmetry), random affine rotations (&plusmn;15&deg; for patient couch tilt), and contrast jitter (&plusmn;15%) to prevent spatial memorization.
+        </p>
+      </div>
+
+      <div class="card" style="padding: 18px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 6px;">Physical CT Film Sheet Processor</div>
+        <p style="font-size: 13.5px; line-height: 1.5;">
+          Custom OpenCV module detects film sheet borders, removes background light-box glare, rectifies perspective skew, and automatically crops out individual CT tiles for batch inference.
+        </p>
+      </div>
+
+      <div class="card" style="padding: 18px 20px;">
+        <div class="card-title" style="font-size: 17px; margin-bottom: 6px;">Test-Time Augmentation (TTA Ensembling)</div>
+        <p style="font-size: 13.5px; line-height: 1.5;">
+          Inference passes each scan through 5 augmented views (identity, flip, &plusmn;5&deg; rotation, contrast shift) and averages softmax predictions, boosting external stability by 2%–5%.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SLIDE 11: REFERENCES -->
+<!-- =================================================================== -->
+<div class="slide">
+  <h1 class="slide-title">References</h1>
+  <div class="grid-2" style="gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="cite-box">
+        <strong>Wang, X., et al. (2026).</strong> Artificial intelligence in lung cancer diagnosis: A systematic review of 204 studies. <em>Clinics</em>. [Systematic review; CNN most common; accuracy 68.4%–100%; AUC 0.61–1.00.]
+      </div>
+      <div class="cite-box">
+        <strong>Choudhury, S., et al. (2025).</strong> Lung cancer detection using deep learning on CT scan images. <em>Procedia Computer Science</em>. [Custom CNN, VGG16, ResNet50, InceptionV3; IQ-OTH/NCCD; 98.7% val. acc.]
+      </div>
+      <div class="cite-box">
+        <strong>Ayesha, S., et al. (2025).</strong> Modified EfficientNet with attention for lung cancer classification. <em>Journal of Artificial Intelligence and Technology (JAIT)</em>. [EfficientNet B0–B7 + attention; 99.5% / 98.0% / 90.3%.]
+      </div>
+      <div class="cite-box">
+        <strong>Alpsalaz, A. (2025).</strong> Comparative analysis of deep learning models for lung cancer detection. <em>Gazi University Journal of Science (GU J Sci)</em>. [ResNet101, VGG19, DenseNet121; IQ-OTH/NCCD; 98% acc.]
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="cite-box">
+        <strong>Jian, Y., et al. (2025).</strong> Hybrid CNN-GRU model for lung cancer detection from CT scan images. <em>Scientific Reports</em>. [CNN-GRU; IQ-OTH/NCCD + CT-Scan; 99.77% acc.]
+      </div>
+      <div class="cite-box">
+        <strong>Tan, J., et al. (2025).</strong> Deep learning for lung cancer detection: A PRISMA-based survey of 119 studies (2019–2023). <em>Archives of Computational Methods in Engineering</em>. [Survey of 7 architecture families.]
+      </div>
+      <div class="cite-box">
+        <strong>Woo, S., Park, J., Lee, J. Y., & Kweon, I. S. (2018).</strong> CBAM: Convolutional block attention module. <em>Proceedings of the European Conference on Computer Vision (ECCV)</em>, 3–19. [Foundational attention architecture.]
+      </div>
+      <div class="cite-box">
+        <strong>Selvaraju, R. R., et al. (2017).</strong> Grad-CAM: Visual explanations from deep networks via gradient-based localization. <em>IEEE International Conference on Computer Vision (ICCV)</em>, 618–626. [Visual explainability.]
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box" style="margin-top: 14px;">
+    <div class="icon">&#128218;</div>
+    <p>All citations formatted in APA 7th edition style. Dataset sources: IQ-OTH/NCCD (Mendeley / Kaggle); LIDC-IDRI (The Cancer Imaging Archive, TCIA / NIH).</p>
+  </div>
+</div>
+
+</body>
+</html>
+"""
+
+# Save HTML and PDF in local workspace directories
+os.makedirs("docs", exist_ok=True)
+os.makedirs("outputs", exist_ok=True)
+html_path = os.path.abspath(os.path.join("docs", "presentation.html"))
+with open(html_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+pdf_dest = os.path.abspath(os.path.join("outputs", "Lung_Cancer_CT_Detection_Presentation.pdf"))
+edge_exe = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+
+print(f"[*] Generated HTML: {html_path}")
+print(f"[*] Compiling to PDF via Edge Headless: {pdf_dest}...")
+
+cmd = [
+    edge_exe,
+    "--headless",
+    "--disable-gpu",
+    "--no-pdf-header-footer",
+    f"--print-to-pdf={pdf_dest}",
+    html_path
+]
+
+res = subprocess.run(cmd, capture_output=True, text=True)
+if os.path.exists(pdf_dest):
+    size_kb = os.path.getsize(pdf_dest) / 1024
+    print(f"[OK] Successfully compiled presentation PDF! ({size_kb:.1f} KB)")
+    print(f"Saved at: {pdf_dest}")
+else:
+    print(f"[!] Error compiling PDF: {res.stderr}")
